@@ -1,0 +1,179 @@
+---
+title: "Tablero Delitos"
+format: 
+  dashboard:
+    orientation: rows
+---
+
+```{r}
+#| label: carga-paquetes
+
+library(tidyverse)
+library(plotly)
+library(DT)
+library(leafem)
+library(leaflet)
+library(leaflet.extras)
+library(leaflet.providers)
+```
+
+```{r}
+#| label: carga-datos
+
+delitos <- 
+  read_delim("estadisticaspoliciales2023.csv")
+```
+
+# Generales
+
+## Column
+```{r}
+#| label: grafico-nacionalidad
+#| title: "Cantidad de delitos por nacionalidad"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Nacionalidad) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  slice(1:5) |>
+  ggplot(aes(
+    x = reorder(Nacionalidad, -n),
+    y = n
+  )) + 
+  geom_col() + 
+  xlab("Nacionalidad") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+
+## Column
+```{r}
+#| label: grafico-tipos-delitos
+#| title: "Cantidad de delitos por tipo"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Delito) |>
+  summarise(n = n()) |>
+  ggplot(aes(
+    x = reorder(Delito, n),
+    y = n
+  )) + 
+  geom_col() + 
+  coord_flip() +
+  xlab("Tipo Delito") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+```{r}
+#| label: grafico-provincia-delitos
+#| title: "Cantidad de delitos por provincia"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Provincia) |>
+  summarise(n = n()) |>
+  ggplot(aes(
+    x = reorder(Provincia, n),
+    y = n
+  )) + 
+  geom_col() + 
+  coord_flip() +
+  xlab("Provincia") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+
+```{r}
+#| label: filtro-homicidio
+
+homicidios <-
+  delitos |>
+  filter(Delito == "HOMICIDIO")
+```
+
+# Homicidios 
+## Row {.tabset}
+## Column
+
+```{r}
+#| label: grafico-provincia-homicidios
+#| title: "Cantidad de homicidios por nacionalidad"
+
+
+grafico_ggplot2 <-
+homicidios |>
+  group_by(Nacionalidad) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  slice(1:5) |>
+  ggplot(aes(
+    x = reorder(Nacionalidad, -n),
+    y = n
+  )) + 
+  geom_col() + 
+  xlab("Nacionalidad") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+## Column
+
+```{r}
+#| label: grafico-provincia-homicidio
+#| title: "Cantidad de homicidio por provincia"
+
+
+grafico_ggplot2 <-
+homicidios |>
+  group_by(Provincia) |>
+  summarise(n = n()) |>
+  ggplot(aes(
+    x = reorder(Provincia, n),
+    y = n
+  )) + 
+  geom_col() + 
+  xlab("Provincia") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+# Otros
+
+## Row
+```{r}
+#| label: tabla
+
+homicidios |>
+  datatable()
+```
+
+```{r}
+leaflet() |>
+  addTiles() |>
+  addProviderTiles(
+    providers$Esri.WorldImagery,
+    group = "Imágenes satelitales (ESRi World Imagery"
+  ) |>
+  setView(
+    lng = -84,
+    lat = 10, 
+    zoom = 7
+  )
+```
+
+
+
+
